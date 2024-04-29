@@ -1,0 +1,200 @@
+import Foundation
+import SwiftProtobuf
+
+public enum FieldMaskErrors: Error {
+  case keyPathNotFound(AnyKeyPath)
+  case pathNotFound(String)
+  case nonWritableKeyPath(AnyKeyPath)
+  case snakeCaseContainsUppercaseChar(String)
+  case charAfterUnderscoreMustBeLowercase(String)
+  case trailingUnderscore(String)
+  case camelCaseContainsUnderscore(String)
+  case repeatedFieldNotCollection(String)
+  case messageFieldNotMessage(String)
+  case mergingDifferentMessageTypes
+}
+
+extension String {
+  static let fieldMaskSeparator = ","
+
+  func snakeCaseToCamelCase() throws -> String {
+    var result = [Character]()
+    var afterUnderscore = false
+    for char in self {
+      if char.isASCII && char.isUppercase {
+        throw FieldMaskErrors.snakeCaseContainsUppercaseChar(self)
+      }
+      if afterUnderscore {
+        if char.isASCII && char.isLowercase {
+          result.append(contentsOf: char.uppercased())
+          afterUnderscore = false
+        } else {
+          throw FieldMaskErrors.charAfterUnderscoreMustBeLowercase(self)
+        }
+      } else if char == "_" {
+        afterUnderscore = true
+      } else {
+        result.append(char)
+      }
+    }
+    if afterUnderscore {
+      throw FieldMaskErrors.trailingUnderscore(self)
+    }
+    return String(result)
+  }
+
+  func camelCaseToSnakeCase() throws -> String {
+    var result = [Character]()
+    for char in self {
+      if char == "_" {
+        throw FieldMaskErrors.camelCaseContainsUnderscore(self)
+      }
+      if char.isASCII && char.isUppercase {
+        result.append("_")
+        result.append(contentsOf: char.lowercased())
+      } else {
+        result.append(char)
+      }
+    }
+    return String(result)
+  }
+}
+
+// @available(macOS 13.0, *)
+// public struct FieldMaskFor<T: Message & FieldMaskExtended> {
+//   fileprivate var fieldMask = Google_Protobuf_FieldMask()
+//   public mutating func addKeyPath(_ keyPath: PartialKeyPath<T>) {
+//     fieldMask.addKeyPath(keyPath)
+//   }
+// }
+
+// @available(macOS 13.0, *)
+// extension Message {
+//   public func fieldMask<T: Message & FieldMaskExtended>(with builder: (inout FieldMaskFor<T>) -> Void) -> Google_Protobuf_FieldMask {
+//     var fieldMask = FieldMaskFor<T>()
+//     builder(&fieldMask)
+//     return fieldMask.fieldMask
+//   }
+// }
+
+extension Google_Protobuf_FieldMask {
+  public init(fromString string: String) {
+    self.init()
+    self.paths = string.components(separatedBy: String.fieldMaskSeparator).filter { !$0.isEmpty }
+    //self.paths = string.split(separator: String.fieldMaskSeparator, omittingEmptySubsequences: true).map { String($0) }
+  }
+
+  public func toString() -> String {
+    return self.paths.joined(separator: .fieldMaskSeparator)
+  }
+
+  public init<T: Message & FieldMaskDescripted>(fromKeyPaths keyPaths: [PartialKeyPath<T>]) throws {
+    self.init()
+    try keyPaths.forEach {
+      guard self.addKeyPath($0) else {
+        throw FieldMaskErrors.keyPathNotFound($0)
+      }
+    }
+  }
+
+  public init<T: Message & FieldMaskDescripted>(forAllFieldsIn type: T.Type) {
+    self.init()
+    for (_, path) in type.fieldMaskDescriptor.keyPaths {
+      self.paths.append(path)
+    }
+  }
+
+  public init<T: Message & FieldMaskDescripted>(forAllFieldsIn message: T) {
+    self.init(forAllFieldsIn: type(of: message))
+  }
+
+  init(fromJsonString jsonString: String) throws {
+    self.init()
+    self.paths = try jsonString.components(separatedBy: String.fieldMaskSeparator).filter { !$0.isEmpty }
+    //self.paths = try jsonString.split(separator: String.fieldMaskSeparator, omittingEmptySubsequences: true)
+      .map { try $0.camelCaseToSnakeCase() }
+  }
+
+  func toJsonString() throws -> String {
+    return try self.paths.map { try $0.snakeCaseToCamelCase() }.joined(separator: .fieldMaskSeparator)
+  }
+
+  public func isValid<T: Message & FieldMaskExtended>(for: T) -> Bool {
+    return self.paths.allSatisfy {
+      T.isValidPath($0)
+    }
+  }
+
+  @discardableResult
+  public mutating func addPath<T: Message & FieldMaskExtended>(_ path: String, for: T) -> Bool {
+    guard T.isValidPath(path) else {
+      return false
+    }
+    self.paths.append(path)
+    return true
+  }
+
+  @discardableResult
+  public mutating func addKeyPath<T: FieldMaskDescripted>(_ keyPath: PartialKeyPath<T>) -> Bool {
+    guard let path = T.fieldMaskDescriptor.keyPaths[keyPath] else {
+      return false
+    }
+    self.paths.append(path)
+    return true
+  }
+
+  public func toCanonicalForm() -> Self {
+    let tree = FieldMaskTree(from: self)
+    return tree.asFieldMask
+  }
+
+  func union(_ fieldMask: Google_Protobuf_FieldMask) -> Google_Protobuf_FieldMask {
+    let tree = FieldMaskTree(from: self)
+    tree.addPaths(from: fieldMask)
+    return tree.asFieldMask
+  }
+
+  func intersect(_ fieldMask: Google_Protobuf_FieldMask) -> Google_Protobuf_FieldMask {
+    var result = FieldMaskTree()
+    let tree = FieldMaskTree(from: fieldMask)
+    for path in fieldMask.paths {
+      result += tree.intersectPath(path)
+    }
+    return result.asFieldMask
+  }
+
+  func subtract<T: Message & FieldMaskDescripted>(_ fieldMask: Google_Protobuf_FieldMask, for type: T.Type) -> Google_Protobuf_FieldMask {
+    if self.paths.isEmpty {
+      return Google_Protobuf_FieldMask()
+    }
+    let tree = FieldMaskTree(from: self)
+    for path in fieldMask.paths {
+      tree.removePath(path, of: type)
+    }
+    return tree.asFieldMask
+  }
+
+  func subtract<T: Message & FieldMaskDescripted>(_ fieldMask: Google_Protobuf_FieldMask, for message: T) -> Google_Protobuf_FieldMask {
+    return self.subtract(fieldMask, for: type(of: message))
+  }
+
+  func containsPath(_ query: String) -> Bool {
+    for path in self.paths {
+      if path == query || query.hasPrefix(path + ".") {
+        return true
+      }
+    }
+    return false
+  }
+
+  func stripping(prefix: String) -> Google_Protobuf_FieldMask {
+    var newMask = Google_Protobuf_FieldMask()
+    for path in self.paths {
+      let parts = path.split(separator: ".", maxSplits: 1)
+      if parts[0] == prefix && parts.count > 1 {
+        newMask.paths.append(String(parts[1]))
+      }
+    }
+    return newMask
+  }
+}
