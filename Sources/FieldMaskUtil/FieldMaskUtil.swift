@@ -15,9 +15,9 @@ public enum FieldMaskErrors: Error {
 }
 
 extension String {
-  static let fieldMaskSeparator = ","
+  fileprivate static let fieldMaskSeparator = ","
 
-  func snakeCaseToCamelCase() throws -> String {
+  fileprivate func snakeCaseToCamelCase() throws -> String {
     var result = [Character]()
     var afterUnderscore = false
     for char in self {
@@ -43,7 +43,7 @@ extension String {
     return String(result)
   }
 
-  func camelCaseToSnakeCase() throws -> String {
+  fileprivate func camelCaseToSnakeCase() throws -> String {
     var result = [Character]()
     for char in self {
       if char == "_" {
@@ -60,28 +60,10 @@ extension String {
   }
 }
 
-// @available(macOS 13.0, *)
-// public struct FieldMaskFor<T: Message & FieldMaskExtended> {
-//   fileprivate var fieldMask = Google_Protobuf_FieldMask()
-//   public mutating func addKeyPath(_ keyPath: PartialKeyPath<T>) {
-//     fieldMask.addKeyPath(keyPath)
-//   }
-// }
-
-// @available(macOS 13.0, *)
-// extension Message {
-//   public func fieldMask<T: Message & FieldMaskExtended>(with builder: (inout FieldMaskFor<T>) -> Void) -> Google_Protobuf_FieldMask {
-//     var fieldMask = FieldMaskFor<T>()
-//     builder(&fieldMask)
-//     return fieldMask.fieldMask
-//   }
-// }
-
 extension Google_Protobuf_FieldMask {
   public init(fromString string: String) {
     self.init()
     self.paths = string.components(separatedBy: String.fieldMaskSeparator).filter { !$0.isEmpty }
-    //self.paths = string.split(separator: String.fieldMaskSeparator, omittingEmptySubsequences: true).map { String($0) }
   }
 
   public func toString() -> String {
@@ -110,8 +92,8 @@ extension Google_Protobuf_FieldMask {
 
   init(fromJsonString jsonString: String) throws {
     self.init()
-    self.paths = try jsonString.components(separatedBy: String.fieldMaskSeparator).filter { !$0.isEmpty }
-    //self.paths = try jsonString.split(separator: String.fieldMaskSeparator, omittingEmptySubsequences: true)
+    self.paths = try jsonString.components(separatedBy: String.fieldMaskSeparator)
+      .filter { !$0.isEmpty }
       .map { try $0.camelCaseToSnakeCase() }
   }
 

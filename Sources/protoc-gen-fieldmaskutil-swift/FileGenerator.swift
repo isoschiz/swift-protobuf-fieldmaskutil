@@ -2,30 +2,9 @@ import Foundation
 import SwiftProtobuf
 import SwiftProtobufPluginLibrary
 
-// private func kpappend<T: FieldMaskDescripted>(_ root: PartialKeyPath<T>, _ kp: AnyKeyPath) -> PartialKeyPath<T> {
-//   let appended = root.appending(path: kp)
-//   return appended!
-// }
-
-// private let _tmp: [FieldMaskUtilFieldDescriptor<Core_Foundation_Users_GetResponse>] = _fieldDescriptorsForCore_Foundation_Users_User.map {
-//   FieldMaskUtilFieldDescriptor<Core_Foundation_Users_GetResponse>(
-//     name: "user." + $0.name,
-//     keyPath: kpappend(\Core_Foundation_Users_GetResponse.user, $0.keyPath),
-//     isRepeated: $0.isRepeated,
-//     isMessage: $0.isMessage,
-//     isRequired: $0.isRequired,
-//     messageType: $0.messageType,
-//     isSubmessageField: true
-//   )
-// }
-
 @available(macOS 13.0, *)
 extension Generator {
   internal func printFieldMaskExtensions() {
-
-    // var repeatedFields: Set<String> = []
-    // var messageFields: Set<String> = []
-    // var requiredFields: Set<String> = []
 
     let fullName = protobufNamer.fullName(message: message)
     guard !seenFields.contains(fullName) else {
@@ -34,29 +13,7 @@ extension Generator {
     seenFields.insert(fullName)
 
     var descriptors: [String] = [fieldDescriptorsVarName]
-    // self.println("private let " + keyPathsVarName + ": [" + keyPathsType + ": String] = [", newline: !message.fields.isEmpty)
-    // if message.fields.isEmpty {
-    //   self.println(":]")
-    // } else {
-    //   for field in message.fields {
-    //     self.field = field
-    //     let fieldNames = protobufNamer.messagePropertyNames(field: field, prefixed: "", includeHasAndClear: false)
-    //     self.withIndentation {
-    //       self.println("\\." + fieldNames.name + ": " + quoted(field.name) + ",")
-    //     }
 
-    //     //if field.isRequired {
-    //     //  requiredFields.insert(fieldNames.name)
-    //     //}
-    //     if case .repeated = field.label {
-    //       repeatedFields.insert(fieldNames.name)
-    //     }
-    //     if case .message = field.type {
-    //       messageFields.insert(fieldNames.name)
-    //     }
-    //   }
-    //   self.println("]")
-    // }
     if message.fields.isEmpty {
       self.println("private let \(fieldDescriptorsVarName): [\(fieldDescriptorsType)] = []")
     } else {
@@ -74,6 +31,10 @@ extension Generator {
           self.printSubtypeFieldDescriptors(for: field)
           self.println()
           descriptors.append(fieldDescriptorsSubtypeVarName(for: field))
+
+          // TODO: enums need to conform to FieldMaskWritable.
+          // TODO: oneofs need handling.
+          // TODO: consider proto2 support?
         }
       }
       self.println("private let \(fieldDescriptorsVarName): [\(fieldDescriptorsType)] = [")
@@ -96,36 +57,12 @@ extension Generator {
       }
       self.println("]")
     }
-    // self.println("private let " + repeatedVarName + ": Set<" + keyPathsType + "> = [")
-    // for field in repeatedFields {
-    //   self.withIndentation {
-    //     self.println("\\." + field + ",")
-    //   }
-    // }
-    // self.println("]")
-    // self.println("private let " + messageVarName + ": Set<" + keyPathsType + "> = [")
-    // for field in messageFields {
-    //   self.withIndentation {
-    //     self.println("\\." + field + ",")
-    //   }
-    // }
-    // self.println("]")
-    // self.println("private let " + requiredVarName + ": Set<" + keyPathsType + "> = [")
-    // for field in requiredFields {
-    //   self.withIndentation {
-    //     self.println("\\." + field + ",")
-    //   }
-    // }
-    // self.println("]")
     self.println()
     self.println("extension " + fullName + ": FieldMaskDescripted {")
     self.withIndentation {
       self.println("public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(")
       self.withIndentation {
         self.println("descriptors: \(descriptors.joined(separator: " + "))")
-        // self.println("repeatedFields: " + repeatedVarName + ",")
-        // self.println("messageFields: " + messageVarName + ",")
-        // self.println("requiredFields: " + requiredVarName)
       }
       self.println(")}()")
     }
@@ -138,11 +75,9 @@ extension Generator {
 
   internal func printSubtypeFieldDescriptors(for field: FieldDescriptor) {
     precondition(field.type == .message)
-//    precondition(field.messageType!.containingType != nil)
     let subMessage = field.messageType!
     let subMessageName = protobufNamer.fullName(message: subMessage)
     let fieldName = protobufNamer.messagePropertyNames(field: field, prefixed: "", includeHasAndClear: false).name
-//    self.println("private let \(fieldDescriptorsSubtypeVarName(for: field)): [\(fieldDescriptorsType)] = \(fieldDescriptorsVarName(for: subMessage)).map {")
     self.println("private let \(fieldDescriptorsSubtypeVarName(for: field)): [\(fieldDescriptorsType)] = \(subMessageName).fieldMaskDescriptor.fields.map {")
     self.withIndentation {
       self.println("\(fieldDescriptorsType)(")
@@ -150,13 +85,6 @@ extension Generator {
         self.println("from: $0,")
         self.println("baseName: \(quoted(fieldName)),")
         self.println("rootKeyPath: \\\(messageFullName).\(fieldName)")
-        // self.println("name: \(quoted(fieldName + ".")) + $0.name,")
-        // self.println("keyPath: keyPathAppend(\\\(messageFullName).\(fieldName), $0.keyPath),")
-        // self.println("isRepeated: $0.isRepeated,")
-        // self.println("isMessage: $0.isMessage,")
-        // self.println("isRequired: $0.isRequired,")
-        // self.println("messageType: $0.messageType,")
-        // self.println("isSubmessageField: true")
       }
       self.println(")")
     }
@@ -224,6 +152,7 @@ extension Generator {
     }
   }
 }
+
 extension Array {
   /// Like `forEach` except that the `body` closure operates on all elements except for the last,
   /// and the `last` closure only operates on the last element.

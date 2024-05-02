@@ -94,7 +94,7 @@ public struct FieldMaskUtilDescriptor<T: FieldMaskDescripted> {
 }
 
 // Protocol for any Messages that have a FieldMaskUtilDescriptor.
-public protocol FieldMaskDescripted where Self: Message {
+public protocol FieldMaskDescripted: Message {
   static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> { get }
   static func isValidPath(_ path: String) -> Bool
 }

@@ -1,8 +1,8 @@
 import Foundation
 import SwiftProtobuf
 
-class FieldMaskTree {
-  class Node: Equatable {
+final class FieldMaskTree {
+  final class Node: Equatable {
     let key: String
     var children: [String: Node] = [:]
     
