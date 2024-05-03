@@ -22,7 +22,7 @@ extension Google_Protobuf_Any: FieldMaskDescripted {
   )}()
 }
 extension Google_Protobuf_Any: FieldMaskWritable {}
-extension Google_Protobuf_Any: FieldMaskExtended {}
+extension Google_Protobuf_Any: FieldMaskExtensions {}
 
 extension Google_Protobuf_Api: FieldMaskDescripted {
   public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(
@@ -75,7 +75,7 @@ extension Google_Protobuf_Api: FieldMaskDescripted {
   )}()
 }
 extension Google_Protobuf_Api: FieldMaskWritable {}
-extension Google_Protobuf_Api: FieldMaskExtended {}
+extension Google_Protobuf_Api: FieldMaskExtensions {}
 
 extension Google_Protobuf_BoolValue: FieldMaskDescripted {
   public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(
@@ -88,7 +88,7 @@ extension Google_Protobuf_BoolValue: FieldMaskDescripted {
   )}()
 }
 extension Google_Protobuf_BoolValue: FieldMaskWritable {}
-extension Google_Protobuf_BoolValue: FieldMaskExtended {}
+extension Google_Protobuf_BoolValue: FieldMaskExtensions {}
 
 extension Google_Protobuf_BytesValue: FieldMaskDescripted {
   public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(
@@ -101,7 +101,7 @@ extension Google_Protobuf_BytesValue: FieldMaskDescripted {
   )}()
 }
 extension Google_Protobuf_BytesValue: FieldMaskWritable {}
-extension Google_Protobuf_BytesValue: FieldMaskExtended {}
+extension Google_Protobuf_BytesValue: FieldMaskExtensions {}
 
 extension Google_Protobuf_DoubleValue: FieldMaskDescripted {
   public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(
@@ -114,7 +114,7 @@ extension Google_Protobuf_DoubleValue: FieldMaskDescripted {
   )}()
 }
 extension Google_Protobuf_DoubleValue: FieldMaskWritable {}
-extension Google_Protobuf_DoubleValue: FieldMaskExtended {}
+extension Google_Protobuf_DoubleValue: FieldMaskExtensions {}
 
 extension Google_Protobuf_Duration: FieldMaskDescripted {
   public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(
@@ -131,7 +131,7 @@ extension Google_Protobuf_Duration: FieldMaskDescripted {
   )}()
 }
 extension Google_Protobuf_Duration: FieldMaskWritable {}
-extension Google_Protobuf_Duration: FieldMaskExtended {}
+extension Google_Protobuf_Duration: FieldMaskExtensions {}
 
 extension Google_Protobuf_Empty: FieldMaskDescripted {
   public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(
@@ -139,7 +139,7 @@ extension Google_Protobuf_Empty: FieldMaskDescripted {
   )}()
 }
 extension Google_Protobuf_Empty: FieldMaskWritable {}
-extension Google_Protobuf_Empty: FieldMaskExtended {}
+extension Google_Protobuf_Empty: FieldMaskExtensions {}
 
 extension Google_Protobuf_Field: FieldMaskDescripted {
   public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(
@@ -191,7 +191,7 @@ extension Google_Protobuf_Field: FieldMaskDescripted {
   )}()
 }
 extension Google_Protobuf_Field: FieldMaskWritable {}
-extension Google_Protobuf_Field: FieldMaskExtended {}
+extension Google_Protobuf_Field: FieldMaskExtensions {}
 
 extension Google_Protobuf_FieldMask: FieldMaskDescripted {
   public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(
@@ -204,7 +204,7 @@ extension Google_Protobuf_FieldMask: FieldMaskDescripted {
   )}()
 }
 extension Google_Protobuf_FieldMask: FieldMaskWritable {}
-extension Google_Protobuf_FieldMask: FieldMaskExtended {}
+extension Google_Protobuf_FieldMask: FieldMaskExtensions {}
 
 extension Google_Protobuf_FloatValue: FieldMaskDescripted {
   public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(
@@ -217,7 +217,7 @@ extension Google_Protobuf_FloatValue: FieldMaskDescripted {
   )}()
 }
 extension Google_Protobuf_FloatValue: FieldMaskWritable {}
-extension Google_Protobuf_FloatValue: FieldMaskExtended {}
+extension Google_Protobuf_FloatValue: FieldMaskExtensions {}
 
 extension Google_Protobuf_Int64Value: FieldMaskDescripted {
   public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(
@@ -230,7 +230,7 @@ extension Google_Protobuf_Int64Value: FieldMaskDescripted {
   )}()
 }
 extension Google_Protobuf_Int64Value: FieldMaskWritable {}
-extension Google_Protobuf_Int64Value: FieldMaskExtended {}
+extension Google_Protobuf_Int64Value: FieldMaskExtensions {}
 
 extension Google_Protobuf_ListValue: FieldMaskDescripted {
   public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(
@@ -246,7 +246,7 @@ extension Google_Protobuf_ListValue: FieldMaskDescripted {
   )}()
 }
 extension Google_Protobuf_ListValue: FieldMaskWritable {}
-extension Google_Protobuf_ListValue: FieldMaskExtended {}
+extension Google_Protobuf_ListValue: FieldMaskExtensions {}
 
 extension Google_Protobuf_Method: FieldMaskDescripted {
   public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(
@@ -286,7 +286,7 @@ extension Google_Protobuf_Method: FieldMaskDescripted {
   )}()
 }
 extension Google_Protobuf_Method: FieldMaskWritable {}
-extension Google_Protobuf_Method: FieldMaskExtended {}
+extension Google_Protobuf_Method: FieldMaskExtensions {}
 
 extension Google_Protobuf_Mixin: FieldMaskDescripted {
   public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(
@@ -303,7 +303,7 @@ extension Google_Protobuf_Mixin: FieldMaskDescripted {
   )}()
 }
 extension Google_Protobuf_Mixin: FieldMaskWritable {}
-extension Google_Protobuf_Mixin: FieldMaskExtended {}
+extension Google_Protobuf_Mixin: FieldMaskExtensions {}
 
 extension Google_Protobuf_Option: FieldMaskDescripted {
   public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(
@@ -322,7 +322,7 @@ extension Google_Protobuf_Option: FieldMaskDescripted {
   )}()
 }
 extension Google_Protobuf_Option: FieldMaskWritable {}
-extension Google_Protobuf_Option: FieldMaskExtended {}
+extension Google_Protobuf_Option: FieldMaskExtensions {}
 
 extension Google_Protobuf_SourceContext: FieldMaskDescripted {
   public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(
@@ -335,7 +335,7 @@ extension Google_Protobuf_SourceContext: FieldMaskDescripted {
   )}()
 }
 extension Google_Protobuf_SourceContext: FieldMaskWritable {}
-extension Google_Protobuf_SourceContext: FieldMaskExtended {}
+extension Google_Protobuf_SourceContext: FieldMaskExtensions {}
 
 extension Google_Protobuf_StringValue: FieldMaskDescripted {
   public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(
@@ -348,7 +348,7 @@ extension Google_Protobuf_StringValue: FieldMaskDescripted {
   )}()
 }
 extension Google_Protobuf_StringValue: FieldMaskWritable {}
-extension Google_Protobuf_StringValue: FieldMaskExtended {}
+extension Google_Protobuf_StringValue: FieldMaskExtensions {}
 
 extension Google_Protobuf_Struct: FieldMaskDescripted {
   public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(
@@ -364,7 +364,7 @@ extension Google_Protobuf_Struct: FieldMaskDescripted {
   )}()
 }
 extension Google_Protobuf_Struct: FieldMaskWritable {}
-extension Google_Protobuf_Struct: FieldMaskExtended {}
+extension Google_Protobuf_Struct: FieldMaskExtensions {}
 
 extension Google_Protobuf_Timestamp: FieldMaskDescripted {
   public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(
@@ -381,7 +381,7 @@ extension Google_Protobuf_Timestamp: FieldMaskDescripted {
   )}()
 }
 extension Google_Protobuf_Timestamp: FieldMaskWritable {}
-extension Google_Protobuf_Timestamp: FieldMaskExtended {}
+extension Google_Protobuf_Timestamp: FieldMaskExtensions {}
 
 extension Google_Protobuf_Type: FieldMaskDescripted {
   public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(
@@ -432,7 +432,7 @@ extension Google_Protobuf_Type: FieldMaskDescripted {
   )}()
 }
 extension Google_Protobuf_Type: FieldMaskWritable {}
-extension Google_Protobuf_Type: FieldMaskExtended {}
+extension Google_Protobuf_Type: FieldMaskExtensions {}
 
 extension Google_Protobuf_UInt32Value: FieldMaskDescripted {
   public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(
@@ -445,7 +445,7 @@ extension Google_Protobuf_UInt32Value: FieldMaskDescripted {
   )}()
 }
 extension Google_Protobuf_UInt32Value: FieldMaskWritable {}
-extension Google_Protobuf_UInt32Value: FieldMaskExtended {}
+extension Google_Protobuf_UInt32Value: FieldMaskExtensions {}
 
 extension Google_Protobuf_UInt64Value: FieldMaskDescripted {
   public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(
@@ -458,7 +458,7 @@ extension Google_Protobuf_UInt64Value: FieldMaskDescripted {
   )}()
 }
 extension Google_Protobuf_UInt64Value: FieldMaskWritable {}
-extension Google_Protobuf_UInt64Value: FieldMaskExtended {}
+extension Google_Protobuf_UInt64Value: FieldMaskExtensions {}
 
 extension Google_Protobuf_Value: FieldMaskDescripted {
   public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(
@@ -517,4 +517,4 @@ extension Google_Protobuf_Value: FieldMaskDescripted {
 //extension Google_Protobuf_Value.OneOf_Kind: FieldMaskWritable {}
 
 extension Google_Protobuf_Value: FieldMaskWritable {}
-extension Google_Protobuf_Value: FieldMaskExtended {}
+extension Google_Protobuf_Value: FieldMaskExtensions {}

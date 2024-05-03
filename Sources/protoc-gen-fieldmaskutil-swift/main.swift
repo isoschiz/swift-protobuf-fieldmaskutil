@@ -103,7 +103,6 @@ func printVersion(args: [String]) {
   print("\(program) \(Version.versionString)")
 }
 
-@available(macOS 13.0, *)
 func main(args: [String]) throws {
   if args.dropFirst().contains("--version") {
     printVersion(args: args)
@@ -151,9 +150,7 @@ func main(args: [String]) throws {
 }
 
 do {
-  if #available(macOS 13.0, *) {
   try main(args: CommandLine.arguments)
-  }
 } catch {
   Log("ERROR: \(error)")
 }

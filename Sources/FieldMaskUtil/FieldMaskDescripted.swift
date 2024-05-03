@@ -65,7 +65,15 @@ public struct FieldMaskUtilFieldDescriptor<T: FieldMaskDescripted> {
     messageType: (any FieldMaskDescripted.Type)? = nil,
     isSubmessageField: Bool = false
   ) -> Self {
-    return Self(name: name, keyPath: keyPath, isRepeated: isRepeated, isMessage: isMessage, isRequired: isRequired, messageType: messageType, isSubmessageField: isSubmessageField)
+    return Self(
+      name: name,
+      keyPath: keyPath,
+      isRepeated: isRepeated,
+      isMessage: isMessage,
+      isRequired: isRequired,
+      messageType: messageType,
+      isSubmessageField: isSubmessageField
+    )
   }
 }
 

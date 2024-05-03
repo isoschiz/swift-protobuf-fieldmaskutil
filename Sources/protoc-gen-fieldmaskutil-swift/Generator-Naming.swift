@@ -33,7 +33,6 @@ private let quotableFieldNames: Set<String> = { () -> Set<String> in
   return names
 }()
 
-@available(macOS 13.0, *)
 extension Generator {
   internal func fieldDescriptorsSubtypeVarName(for field: FieldDescriptor) -> String {
     let fieldName = protobufNamer.messagePropertyNames(field: field, prefixed: "", includeHasAndClear: false).name
@@ -41,7 +40,7 @@ extension Generator {
   }
   internal func fieldDescriptorsVarName(for thisMessage: Descriptor) -> String {
     let fullName = protobufNamer.fullName(message: thisMessage)
-    return "_fieldDescriptorsFor\(fullName.replacing(".", with: "__"))"
+    return "_fieldDescriptorsFor\(fullName.replacingOccurrences(of: ".", with: "__"))"
   }
   internal var fieldDescriptorsVarName: String {
     return fieldDescriptorsVarName(for: message)

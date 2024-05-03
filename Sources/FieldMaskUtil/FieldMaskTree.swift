@@ -156,13 +156,13 @@ final class FieldMaskTree {
             try valueType.write(keyPath: keyPath, object: &destination, value: newValue)
             //destination[keyPath: keyPath] = message[keyPath: keyPath]
           } else {
-            guard let _ = destination[keyPath: keyPath] as? any FieldMaskExtended else {
+            guard let _ = destination[keyPath: keyPath] as? any FieldMaskExtensions else {
               throw FieldMaskErrors.messageFieldNotMessage(path)
             }
-            guard let source = message[keyPath: keyPath] as? any FieldMaskExtended else {
+            guard let source = message[keyPath: keyPath] as? any FieldMaskExtensions else {
               throw FieldMaskErrors.messageFieldNotMessage(path)
             }
-            var tmpValue = destination[keyPath: keyPath] as! any FieldMaskExtended
+            var tmpValue = destination[keyPath: keyPath] as! any FieldMaskExtensions
             try tmpValue.merge(from: source)
             try valueType.write(keyPath: keyPath, object: &destination, value: tmpValue)
             //destination[keyPath: keyPath] = tmpValue

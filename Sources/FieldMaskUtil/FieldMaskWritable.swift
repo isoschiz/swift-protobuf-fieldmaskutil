@@ -3,18 +3,26 @@ import SwiftProtobuf
 
 public protocol FieldMaskWritable {
   init()
-  static func write<T>(keyPath: AnyKeyPath, object: inout T, value: Any) throws
-  static func write<T>(keyPath: AnyKeyPath, object: inout T, value: Any?) throws
+  static func write<T>(keyPath: PartialKeyPath<T>, object: inout T, value: Any) throws
+  static func write<T>(keyPath: PartialKeyPath<T>, object: inout T, value: Any?) throws
 }
 
 extension FieldMaskWritable {
-  public static func write<T>(keyPath: AnyKeyPath, object: inout T, value: Any) throws {
+  public static func write<T>(
+    keyPath: PartialKeyPath<T>,
+    object: inout T,
+    value: Any
+  ) throws {
     guard let path = keyPath as? WritableKeyPath<T, Self> else {
       throw FieldMaskErrors.nonWritableKeyPath(keyPath)
     }
     object[keyPath: path] = value as! Self
   }
-  public static func write<T>(keyPath: AnyKeyPath, object: inout T, value: Any?) throws {
+  public static func write<T>(
+    keyPath: PartialKeyPath<T>,
+    object: inout T,
+    value: Any?
+  ) throws {
     guard let path = keyPath as? WritableKeyPath<T, Self?> else {
       throw FieldMaskErrors.nonWritableKeyPath(keyPath)
     }

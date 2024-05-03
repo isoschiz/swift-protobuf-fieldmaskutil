@@ -60,17 +60,39 @@ extension String {
   }
 }
 
+// To and from strings.
 extension Google_Protobuf_FieldMask {
   public init(fromString string: String) {
     self.init()
-    self.paths = string.components(separatedBy: String.fieldMaskSeparator).filter { !$0.isEmpty }
+    self.paths = string
+      .components(separatedBy: String.fieldMaskSeparator)
+      .filter { !$0.isEmpty }
   }
 
   public func toString() -> String {
     return self.paths.joined(separator: .fieldMaskSeparator)
   }
 
-  public init<T: Message & FieldMaskDescripted>(fromKeyPaths keyPaths: [PartialKeyPath<T>]) throws {
+  init(fromJsonString jsonString: String) throws {
+    self.init()
+    self.paths = try jsonString
+      .components(separatedBy: String.fieldMaskSeparator)
+      .filter { !$0.isEmpty }
+      .map { try $0.camelCaseToSnakeCase() }
+  }
+
+  func toJsonString() throws -> String {
+    return try self.paths
+      .map { try $0.snakeCaseToCamelCase() }
+      .joined(separator: .fieldMaskSeparator)
+  }
+}
+
+// Initialising FieldMasks.
+extension Google_Protobuf_FieldMask {
+  public init<T: FieldMaskDescripted>(
+    fromKeyPaths keyPaths: [PartialKeyPath<T>]
+  ) throws {
     self.init()
     try keyPaths.forEach {
       guard self.addKeyPath($0) else {
@@ -79,85 +101,28 @@ extension Google_Protobuf_FieldMask {
     }
   }
 
-  public init<T: Message & FieldMaskDescripted>(forAllFieldsIn type: T.Type) {
+  public init<T: FieldMaskDescripted>(forAllFieldsIn type: T.Type) {
     self.init()
-    for (_, path) in type.fieldMaskDescriptor.keyPaths {
+    for (_, path) in T.fieldMaskDescriptor.keyPaths {
       self.paths.append(path)
     }
   }
 
-  public init<T: Message & FieldMaskDescripted>(forAllFieldsIn message: T) {
+  public init<T: FieldMaskDescripted>(forAllFieldsIn message: T) {
     self.init(forAllFieldsIn: type(of: message))
   }
+}
 
-  init(fromJsonString jsonString: String) throws {
-    self.init()
-    self.paths = try jsonString.components(separatedBy: String.fieldMaskSeparator)
-      .filter { !$0.isEmpty }
-      .map { try $0.camelCaseToSnakeCase() }
-  }
-
-  func toJsonString() throws -> String {
-    return try self.paths.map { try $0.snakeCaseToCamelCase() }.joined(separator: .fieldMaskSeparator)
-  }
-
-  public func isValid<T: Message & FieldMaskExtended>(for: T) -> Bool {
+// Manipulating the paths.
+extension Google_Protobuf_FieldMask {
+  public func isValid<T: FieldMaskDescripted>(for type: T.Type) -> Bool {
     return self.paths.allSatisfy {
       T.isValidPath($0)
     }
   }
 
-  @discardableResult
-  public mutating func addPath<T: Message & FieldMaskExtended>(_ path: String, for: T) -> Bool {
-    guard T.isValidPath(path) else {
-      return false
-    }
-    self.paths.append(path)
-    return true
-  }
-
-  @discardableResult
-  public mutating func addKeyPath<T: FieldMaskDescripted>(_ keyPath: PartialKeyPath<T>) -> Bool {
-    guard let path = T.fieldMaskDescriptor.keyPaths[keyPath] else {
-      return false
-    }
-    self.paths.append(path)
-    return true
-  }
-
-  public func toCanonicalForm() -> Self {
-    let tree = FieldMaskTree(from: self)
-    return tree.asFieldMask
-  }
-
-  func union(_ fieldMask: Google_Protobuf_FieldMask) -> Google_Protobuf_FieldMask {
-    let tree = FieldMaskTree(from: self)
-    tree.addPaths(from: fieldMask)
-    return tree.asFieldMask
-  }
-
-  func intersect(_ fieldMask: Google_Protobuf_FieldMask) -> Google_Protobuf_FieldMask {
-    var result = FieldMaskTree()
-    let tree = FieldMaskTree(from: fieldMask)
-    for path in fieldMask.paths {
-      result += tree.intersectPath(path)
-    }
-    return result.asFieldMask
-  }
-
-  func subtract<T: Message & FieldMaskDescripted>(_ fieldMask: Google_Protobuf_FieldMask, for type: T.Type) -> Google_Protobuf_FieldMask {
-    if self.paths.isEmpty {
-      return Google_Protobuf_FieldMask()
-    }
-    let tree = FieldMaskTree(from: self)
-    for path in fieldMask.paths {
-      tree.removePath(path, of: type)
-    }
-    return tree.asFieldMask
-  }
-
-  func subtract<T: Message & FieldMaskDescripted>(_ fieldMask: Google_Protobuf_FieldMask, for message: T) -> Google_Protobuf_FieldMask {
-    return self.subtract(fieldMask, for: type(of: message))
+  public func isValid<T: FieldMaskDescripted>(for message: T) -> Bool {
+    return self.isValid(for: type(of: message))
   }
 
   func containsPath(_ query: String) -> Bool {
@@ -169,7 +134,18 @@ extension Google_Protobuf_FieldMask {
     return false
   }
 
+  func containsKeyPath<T: FieldMaskDescripted>(
+    _ query: PartialKeyPath<T>
+  ) throws -> Bool {
+    guard let path = T.fieldMaskDescriptor.keyPaths[query] else {
+      throw FieldMaskErrors.keyPathNotFound(query)
+    }
+    return self.containsPath(path)
+  }
+
   func stripping(prefix: String) -> Google_Protobuf_FieldMask {
+    // TODO: remove this and handle complex prefixes.
+    precondition(!prefix.contains("."))
     var newMask = Google_Protobuf_FieldMask()
     for path in self.paths {
       let parts = path.split(separator: ".", maxSplits: 1)
@@ -178,5 +154,85 @@ extension Google_Protobuf_FieldMask {
       }
     }
     return newMask
+  }
+
+  func stripping<T: FieldMaskDescripted>(
+    root: PartialKeyPath<T>
+  ) throws -> Google_Protobuf_FieldMask {
+    guard let path = T.fieldMaskDescriptor.keyPaths[root] else {
+      throw FieldMaskErrors.keyPathNotFound(root)
+    }
+    return self.stripping(prefix: path)
+  }
+
+  @discardableResult
+  public mutating func addPath<T: FieldMaskDescripted>(
+    _ path: String,
+    for: T
+  ) -> Bool {
+    guard T.isValidPath(path) else {
+      return false
+    }
+    self.paths.append(path)
+    return true
+  }
+
+  @discardableResult
+  public mutating func addKeyPath<T: FieldMaskDescripted>(
+    _ keyPath: PartialKeyPath<T>
+  ) -> Bool {
+    guard let path = T.fieldMaskDescriptor.keyPaths[keyPath] else {
+      return false
+    }
+    self.paths.append(path)
+    return true
+  }
+
+  public func toCanonicalForm() -> Self {
+    let tree = FieldMaskTree(from: self)
+    return tree.asFieldMask
+  }
+}
+
+// Combining FieldMasks.
+extension Google_Protobuf_FieldMask {
+  func union(
+    _ fieldMask: Google_Protobuf_FieldMask
+  ) -> Google_Protobuf_FieldMask {
+    let tree = FieldMaskTree(from: self)
+    tree.addPaths(from: fieldMask)
+    return tree.asFieldMask
+  }
+
+  func intersect(
+    _ fieldMask: Google_Protobuf_FieldMask
+  ) -> Google_Protobuf_FieldMask {
+    var result = FieldMaskTree()
+    let tree = FieldMaskTree(from: fieldMask)
+    for path in fieldMask.paths {
+      result += tree.intersectPath(path)
+    }
+    return result.asFieldMask
+  }
+
+  func subtract<T: FieldMaskDescripted>(
+    _ fieldMask: Google_Protobuf_FieldMask,
+    for type: T.Type
+  ) -> Google_Protobuf_FieldMask {
+    if self.paths.isEmpty {
+      return Google_Protobuf_FieldMask()
+    }
+    let tree = FieldMaskTree(from: self)
+    for path in fieldMask.paths {
+      tree.removePath(path, of: type)
+    }
+    return tree.asFieldMask
+  }
+
+  func subtract<T: FieldMaskDescripted>(
+    _ fieldMask: Google_Protobuf_FieldMask,
+    for message: T
+  ) -> Google_Protobuf_FieldMask {
+    return self.subtract(fieldMask, for: type(of: message))
   }
 }

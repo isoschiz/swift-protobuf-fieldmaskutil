@@ -2,10 +2,8 @@ import Foundation
 import SwiftProtobuf
 import SwiftProtobufPluginLibrary
 
-@available(macOS 13.0, *)
 extension Generator {
   internal func printFieldMaskExtensions() {
-
     let fullName = protobufNamer.fullName(message: message)
     guard !seenFields.contains(fullName) else {
       return
@@ -69,7 +67,7 @@ extension Generator {
     self.println("}")
     self.println()
     self.println("extension \(fullName): FieldMaskWritable {}")
-    self.println("extension \(fullName): FieldMaskExtended {}")
+    self.println("extension \(fullName): FieldMaskExtensions {}")
     self.println()
   }
 

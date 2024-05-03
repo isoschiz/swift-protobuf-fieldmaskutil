@@ -1,6 +1,5 @@
 import SwiftProtobufPluginLibrary
 
-@available(macOS 13.0, *)
 class Generator {
   internal var options: GeneratorOptions
   private var printer: CodePrinter
@@ -126,15 +125,13 @@ class Generator {
     self.printPrivateFuncs()
     self.println()
 
-    // We defer the check for printing clients to `printClient()` since this could be the 'real'
-    // client or the test client.
     for message in self.file.messages {
       self.message = message
       self.printFieldMaskExtensions()
     }
   }
 
-  func printPrivateFuncs() {
+  private func printPrivateFuncs() {
     self.printFunction(
       name: "keyPathAppend<T: FieldMaskDescripted>",
       arguments: ["_ root: PartialKeyPath<T>", "_ keyPath: AnyKeyPath"],
@@ -143,9 +140,5 @@ class Generator {
     ) {
       self.println("return root.appending(path: keyPath)!")
     }
-  }
-
-  func printAvailabilityForAsyncAwait() {
-    self.println("@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)")
   }
 }

@@ -1,13 +1,13 @@
 import Foundation
 import SwiftProtobuf
 
-enum PathElement<T: Message & FieldMaskExtended> {
+public enum PathElement<T: FieldMaskExtensions> {
   case keyPath(PartialKeyPath<T>)
   case path(String)
 }
 
 @resultBuilder
-public struct FieldMaskBuilder<T: Message & FieldMaskExtended> {
+public struct FieldMaskBuilder<T: FieldMaskExtensions> {
   public static func buildBlock() -> [PathElement<T>] {
     []
   }
@@ -43,8 +43,10 @@ public struct FieldMaskBuilder<T: Message & FieldMaskExtended> {
   }
 }
 
-extension FieldMaskExtended where Self: Message {
-  public func fieldMask(@FieldMaskBuilder<Self> _ builder: () -> [PathElement<Self>]) throws -> FieldMask {
+extension FieldMaskExtensions where Self: Message {
+  public func buildFieldMask(
+    @FieldMaskBuilder<Self> _ builder: () -> [PathElement<Self>]
+  ) throws -> Google_Protobuf_FieldMask {
     var fieldMask = Google_Protobuf_FieldMask()
     let elements = builder()
     for element in elements {
