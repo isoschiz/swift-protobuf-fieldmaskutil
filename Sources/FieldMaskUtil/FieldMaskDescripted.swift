@@ -1,6 +1,9 @@
 import Foundation
 import SwiftProtobuf
 
+// Workaround for https://github.com/apple/swift/issues/57560
+extension AnyKeyPath: @unchecked Sendable {}
+
 // Helper function that does some type coercion for us.
 // Note: the target type of root must match the source type of keyPath.
 private func keyPathAppend<T: FieldMaskDescripted>(
@@ -11,7 +14,7 @@ private func keyPathAppend<T: FieldMaskDescripted>(
 }
 
 // Descriptor for a field - suitable only for use by FieldMaskUtil.
-public struct FieldMaskUtilFieldDescriptor<T: FieldMaskDescripted> {
+public struct FieldMaskUtilFieldDescriptor<T: FieldMaskDescripted>: Sendable {
   let name: String
   let keyPath: PartialKeyPath<T>
   let isRepeated: Bool
@@ -78,7 +81,7 @@ public struct FieldMaskUtilFieldDescriptor<T: FieldMaskDescripted> {
 }
 
 // Descriptor for a Message - suitable only for user by FieldMaskUtil.
-public struct FieldMaskUtilDescriptor<T: FieldMaskDescripted> {
+public struct FieldMaskUtilDescriptor<T: FieldMaskDescripted>: Sendable {
   public let fields: [FieldMaskUtilFieldDescriptor<T>] 
   let keyPaths: [PartialKeyPath<T>: String]
   let inverseKeyPaths: [String: PartialKeyPath<T>]

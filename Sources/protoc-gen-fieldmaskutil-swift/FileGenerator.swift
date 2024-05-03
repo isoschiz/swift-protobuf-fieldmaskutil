@@ -58,7 +58,7 @@ extension Generator {
     self.println()
     self.println("extension " + fullName + ": FieldMaskDescripted {")
     self.withIndentation {
-      self.println("public static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(")
+      self.println("public static let fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> = { FieldMaskUtilDescriptor<Self>(")
       self.withIndentation {
         self.println("descriptors: \(descriptors.joined(separator: " + "))")
       }

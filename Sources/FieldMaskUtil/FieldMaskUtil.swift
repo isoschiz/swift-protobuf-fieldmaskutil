@@ -147,8 +147,8 @@ extension Google_Protobuf_FieldMask {
     let prefix = "\(prefix)."
     var newMask = Google_Protobuf_FieldMask()
     for path in self.paths {
-      if path.starts(prefix) {
-        newMask.paths.append(path.trimPrefix(prefix))
+      if path.starts(with: prefix) {
+        newMask.paths.append(String(path.dropFirst(prefix.count)))
       }
     }
     return newMask

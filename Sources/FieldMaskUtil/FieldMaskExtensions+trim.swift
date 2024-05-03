@@ -14,7 +14,7 @@ extension FieldMaskExtensions {
       guard let keyPath = Self.fieldMaskDescriptor.inverseKeyPaths[path] else {
         throw FieldMaskErrors.pathNotFound(path)
       }
-      let valueType = type(of: self[keyPath: keyPath]) as! FieldMaskWritable.Type
+      let valueType = type(of: self[keyPath: keyPath]) as! any FieldMaskWritable.Type
       let newValue = valueType.init()
       try valueType.write(keyPath: keyPath, object: &self, value: newValue)    
     }

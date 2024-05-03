@@ -148,7 +148,7 @@ final class FieldMaskTree {
       }
 
       let newValue = message[keyPath: keyPath]
-      let valueType = type(of: newValue) as! FieldMaskWritable.Type
+      let valueType = type(of: newValue) as! any FieldMaskWritable.Type
 
       if !field.isRepeated {
         if field.isMessage {
