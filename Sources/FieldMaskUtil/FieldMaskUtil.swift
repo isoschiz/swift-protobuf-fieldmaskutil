@@ -163,18 +163,33 @@ extension Google_Protobuf_FieldMask {
     return self.stripping(prefix: path)
   }
 
+  // Returns whether the field mask was mutated.
   @discardableResult
   public mutating func addPath<T: FieldMaskDescripted>(
     _ path: String,
     for: T
   ) -> Bool {
+    return self.addPath(path, for: T.self)
+  }
+
+  // Returns whether the field mask was mutated.
+  @discardableResult
+  public mutating func addPath<T: FieldMaskDescripted>(
+    _ path: String,
+    for: T.Type
+  ) -> Bool {
     guard T.isValidPath(path) else {
       return false
     }
-    self.paths.append(path)
-    return true
+    let tree = FieldMaskTree(from: self)
+    let changed = tree.addPath(path)
+    if changed {
+      self = tree.asFieldMask
+    }
+    return changed
   }
 
+  // Returns whether the field mask was mutated.
   @discardableResult
   public mutating func addKeyPath<T: FieldMaskDescripted>(
     _ keyPath: PartialKeyPath<T>
@@ -182,8 +197,7 @@ extension Google_Protobuf_FieldMask {
     guard let path = T.fieldMaskDescriptor.keyPaths[keyPath] else {
       return false
     }
-    self.paths.append(path)
-    return true
+    return self.addPath(path, for: T.self)
   }
 
   public func toCanonicalForm() -> Self {
@@ -198,7 +212,7 @@ extension Google_Protobuf_FieldMask {
     _ fieldMask: Google_Protobuf_FieldMask
   ) -> Google_Protobuf_FieldMask {
     let tree = FieldMaskTree(from: self)
-    tree.addPaths(from: fieldMask)
+    _ = tree.addPaths(from: fieldMask)
     return tree.asFieldMask
   }
 

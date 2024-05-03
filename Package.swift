@@ -47,7 +47,25 @@ let package = Package(
       dependencies: [
         .protobuf,
       ],
-      path: "Sources/FieldMaskUtil"
+      path: "Sources/FieldMaskUtil",
+      swiftSettings: .packageSettings
+    ),
+    .testTarget(
+        name: "FieldMaskUtilTests",
+        dependencies: ["FieldMaskUtil"],
+        swiftSettings: .packageSettings
     ),
   ]
 )
+
+// Settings for every Swift target in this package, like project-level settings
+// in an Xcode project.
+extension Array where Element == PackageDescription.SwiftSetting {
+  static var packageSettings: Self {
+    [
+      .enableExperimentalFeature("StrictConcurrency=complete"),
+      .enableExperimentalFeature("InferSendableFromCaptures"),
+      .enableUpcomingFeature("ExistentialAny"),
+    ]
+  }
+}

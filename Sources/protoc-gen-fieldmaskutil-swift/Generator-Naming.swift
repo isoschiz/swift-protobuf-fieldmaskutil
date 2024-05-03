@@ -39,11 +39,13 @@ extension Generator {
     return "\(fieldDescriptorsVarName)__\(fieldName)" 
   }
   internal func fieldDescriptorsVarName(for thisMessage: Descriptor) -> String {
-    let fullName = protobufNamer.fullName(message: thisMessage)
-    return "_fieldDescriptorsFor\(fullName.replacingOccurrences(of: ".", with: "__"))"
+    return "_fieldDescriptorsFor\(fullNameFor(thisMessage).replacingOccurrences(of: ".", with: "__"))"
   }
   internal var fieldDescriptorsVarName: String {
     return fieldDescriptorsVarName(for: message)
+  }
+  internal func fullNameFor(_ thisMessage: Descriptor) -> String {
+    return protobufNamer.fullName(message: thisMessage)
   }
   internal var messageFullName: String {
     return protobufNamer.fullName(message: message)

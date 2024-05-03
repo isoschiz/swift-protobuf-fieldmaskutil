@@ -17,7 +17,7 @@ final class FieldMaskTree {
     
     func allPaths() -> [String] {
       if children.isEmpty {
-        return [key]
+        return key.isEmpty ? [] : [key]
       } else {
         return children.flatMap { _, node in
           node.allPaths().map { key.isEmpty ? $0 : "\(key).\($0)" }
@@ -31,7 +31,7 @@ final class FieldMaskTree {
   
   init(from fieldMask: Google_Protobuf_FieldMask) {
     for path in fieldMask.paths {
-      addPath(path)
+      _ = addPath(path)
     }
   }
   
@@ -41,24 +41,41 @@ final class FieldMaskTree {
     }
   }
 
-  func addPaths(from fieldMask: Google_Protobuf_FieldMask) {
+  func addPaths(from fieldMask: Google_Protobuf_FieldMask) -> Bool {
+    var changed = false
     for path in fieldMask.paths {
-      self.addPath(path)
+      changed = changed || self.addPath(path)
     }
+    return changed
   }
   
-  func addPath(_ path: String) {
+  // Returns whether the tree was mutated.
+  func addPath(_ path: String) -> Bool {
     var curr = root
+    var newBranch = false
     for segment in path.split(separator: ".") {
       let segment = String(segment)
+      if !newBranch && curr != root && curr.children.isEmpty {
+        // New path already covered by this branch. E.g. adding foo.bar.baz
+        // to a tree that already has foo.bar.
+        return false
+      }
       if let next = curr.children[segment] {
         curr = next
       } else {
         let next = Node(key: segment)
         curr.children[segment] = next
         curr = next
+        newBranch = true
       }
     }
+    guard curr.children.isEmpty else {
+      // Need to remove the more specified children. E.g. adding foo.bar
+      // to a tree that already has foo.bar.baz.
+      curr.children.removeAll()
+      return true
+    }
+    return newBranch
   }
   
   func removePath<T: FieldMaskDescripted>(_ path: String, of type: T.Type) {
@@ -90,7 +107,7 @@ final class FieldMaskTree {
       let segment = String(segment)
       guard !curr.children.isEmpty else {
         if curr != root {
-          result.addPath(path)
+          _ = result.addPath(path)
         }
         return result
       }
@@ -185,17 +202,17 @@ final class FieldMaskTree {
 
   static func +(left: FieldMaskTree, right: FieldMaskTree) ->  FieldMaskTree {
     let result = FieldMaskTree(from: left.asFieldMask)
-    result.addPaths(from: right.asFieldMask)
+    _ = result.addPaths(from: right.asFieldMask)
     return result
   }
 
   static func +=(left: inout FieldMaskTree, right: FieldMaskTree) {
-    left.addPaths(from: right.asFieldMask)
+    _ = left.addPaths(from: right.asFieldMask)
   }
 
   private func mergeLeafNodes(prefix: String, node: Node) {
     guard !node.children.isEmpty else {
-      self.addPath(prefix)
+      _ = self.addPath(prefix)
       return
     }
     for (_, child) in node.children {

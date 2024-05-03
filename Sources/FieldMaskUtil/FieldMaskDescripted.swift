@@ -13,6 +13,42 @@ private func keyPathAppend<T: FieldMaskDescripted>(
   return root.appending(path: keyPath)!
 }
 
+// private func getFields<T>(for messageType: T.Type) -> [FieldMaskUtilFieldDescriptor<some FieldMaskDescripted>] where T: FieldMaskDescripted {
+//   messageType.fieldMaskDescriptor.fields
+// }
+
+@resultBuilder
+public struct FieldDescriptorBuilder<T: FieldMaskDescripted> {
+  public typealias FieldDescriptor = FieldMaskUtilFieldDescriptor<T>
+  public static func buildBlock() -> [FieldDescriptor] {
+    []
+  }
+  public static func buildExpression(_ expression: FieldDescriptor) -> [FieldDescriptor] {
+    [expression]
+  }
+  public static func buildExpression(_ expression: [FieldDescriptor]) -> [FieldDescriptor] {
+    expression
+  }
+  public static func buildBlock(_ components: [FieldDescriptor]...) -> [FieldDescriptor] {
+    components.flatMap { $0 }
+  }
+  public static func buildOptional(_ components: [FieldDescriptor]?) -> [FieldDescriptor] {
+    components ?? []
+  }
+  public static func buildEither(first components: [FieldDescriptor]) -> [FieldDescriptor] {
+    components
+  }
+  public static func buildEither(second components: [FieldDescriptor]) -> [FieldDescriptor] {
+    components
+  }
+  public static func buildArray(_ components: [[FieldDescriptor]]) -> [FieldDescriptor] {
+    components.flatMap { $0 }
+  }
+  public static func buildLimitedAvailability(_ components: [FieldDescriptor]) -> [FieldDescriptor] {
+    components
+  }
+}
+
 // Descriptor for a field - suitable only for use by FieldMaskUtil.
 public struct FieldMaskUtilFieldDescriptor<T: FieldMaskDescripted>: Sendable {
   let name: String
@@ -22,6 +58,17 @@ public struct FieldMaskUtilFieldDescriptor<T: FieldMaskDescripted>: Sendable {
   let isRequired: Bool
   let messageType: (any FieldMaskDescripted.Type)?
   let isSubmessageField: Bool
+
+  public static func allFrom(
+    _ fields: [FieldMaskUtilFieldDescriptor<some FieldMaskDescripted>],
+    baseName: String,
+    rootKeyPath: PartialKeyPath<T>
+  ) -> [FieldMaskUtilFieldDescriptor<T>] {
+    fields.map {
+      FieldMaskUtilFieldDescriptor<T>(
+        from: $0, baseName: baseName, rootKeyPath: rootKeyPath)
+    }
+  }
 
   // Initialiser for building descriptors from sub-fields.
   public init(
@@ -88,6 +135,12 @@ public struct FieldMaskUtilDescriptor<T: FieldMaskDescripted>: Sendable {
   let repeatedFields: Set<PartialKeyPath<T>>
   let messageFields: Set<PartialKeyPath<T>>
   let requiredFields: Set<PartialKeyPath<T>>
+
+  public static func build(
+    @FieldDescriptorBuilder<T> _ builder: () -> [FieldMaskUtilFieldDescriptor<T>]
+  ) -> FieldMaskUtilDescriptor<T> {
+    Self.init(descriptors: builder())
+  }
 
   // Initialise from a set of FieldDescriptors.
   public init(

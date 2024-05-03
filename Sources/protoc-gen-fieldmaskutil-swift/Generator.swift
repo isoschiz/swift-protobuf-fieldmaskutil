@@ -94,6 +94,66 @@ class Generator {
     self.println(braces.close)
   }
 
+
+  internal func printFunction(
+    name: String,
+    arguments: [String],
+    returnType: String?,
+    access: String? = nil,
+    sendable: Bool = false,
+    async: Bool = false,
+    throws: Bool = false,
+    genericWhereClause: String? = nil,
+    bodyBuilder: (() -> Void)?
+  ) {
+    // Add a space after access, if it exists.
+    let functionHead = (access.map { $0 + " " } ?? "") + (sendable ? "@Sendable " : "")
+    let `return` = returnType.map { " -> " + $0 } ?? ""
+    let genericWhere = genericWhereClause.map { " " + $0 } ?? ""
+
+    let asyncThrows: String
+    switch (async, `throws`) {
+    case (true, true):
+      asyncThrows = " async throws"
+    case (true, false):
+      asyncThrows = " async"
+    case (false, true):
+      asyncThrows = " throws"
+    case (false, false):
+      asyncThrows = ""
+    }
+
+    let hasBody = bodyBuilder != nil
+
+    if arguments.isEmpty {
+      // Don't bother splitting across multiple lines if there are no arguments.
+      self.println(
+        "\(functionHead)func \(name)()\(asyncThrows)\(`return`)\(genericWhere)",
+        newline: !hasBody
+      )
+    } else {
+      self.println("\(functionHead)func \(name)(")
+      self.withIndentation {
+        // Add a comma after each argument except the last.
+        arguments.forEach(
+          beforeLast: {
+            self.println($0 + ",")
+          },
+          onLast: {
+            self.println($0)
+          }
+        )
+      }
+      self.println(")\(asyncThrows)\(`return`)\(genericWhere)", newline: !hasBody)
+    }
+
+    if let bodyBuilder = bodyBuilder {
+      self.withIndentation("", braces: .curly) {
+        bodyBuilder()
+      }
+    }
+  }
+
   private func printMain() {
     self.printer.print(
       """
@@ -139,6 +199,19 @@ class Generator {
       access: "private"
     ) {
       self.println("return root.appending(path: keyPath)!")
+    }
+  }
+}
+
+extension Array {
+  /// Like `forEach` except that the `body` closure operates on all elements except for the last,
+  /// and the `last` closure only operates on the last element.
+  fileprivate func forEach(beforeLast body: (Element) -> Void, onLast last: (Element) -> Void) {
+    for element in self.dropLast() {
+      body(element)
+    }
+    if let lastElement = self.last {
+      last(lastElement)
     }
   }
 }

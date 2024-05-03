@@ -52,9 +52,10 @@ extension FieldMaskExtensions where Self: Message {
     for element in elements {
       switch element {
       case .path(let path):
-        if !fieldMask.addPath(path, for: self) {
+        guard let _ = Self.fieldMaskDescriptor.inverseKeyPaths[path] else {
           throw FieldMaskErrors.pathNotFound(path)
         }
+        fieldMask.addPath(path, for: self)
       case .keyPath(let keyPath):
         fieldMask.addKeyPath(keyPath)
       }
