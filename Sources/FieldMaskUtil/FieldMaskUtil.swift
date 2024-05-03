@@ -144,13 +144,11 @@ extension Google_Protobuf_FieldMask {
   }
 
   func stripping(prefix: String) -> Google_Protobuf_FieldMask {
-    // TODO: remove this and handle complex prefixes.
-    precondition(!prefix.contains("."))
+    let prefix = "\(prefix)."
     var newMask = Google_Protobuf_FieldMask()
     for path in self.paths {
-      let parts = path.split(separator: ".", maxSplits: 1)
-      if parts[0] == prefix && parts.count > 1 {
-        newMask.paths.append(String(parts[1]))
+      if path.starts(prefix) {
+        newMask.paths.append(path.trimPrefix(prefix))
       }
     }
     return newMask
