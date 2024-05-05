@@ -3,7 +3,7 @@ import SwiftProtobuf
 import SwiftProtobufPluginLibrary
 
 enum Version {
-  static let versionString = "0.0.1"
+  static let versionString = "0.1.0"
 }
 
 func Log(_ message: String) {

@@ -4,8 +4,9 @@ import SwiftProtobuf
 // Workaround for https://github.com/apple/swift/issues/57560
 extension AnyKeyPath: @unchecked Sendable {}
 
-// Helper function that does some type coercion for us.
-// Note: the target type of root must match the source type of keyPath.
+/// Helper function to coerce types when appending KeyPaths.
+///
+/// Note: the target type of `root`` must match the source type of `keyPath``.
 private func keyPathAppend<T: FieldMaskDescripted>(
   _ root: PartialKeyPath<T>,
   _ keyPath: AnyKeyPath
@@ -13,10 +14,9 @@ private func keyPathAppend<T: FieldMaskDescripted>(
   return root.appending(path: keyPath)!
 }
 
-// private func getFields<T>(for messageType: T.Type) -> [FieldMaskUtilFieldDescriptor<some FieldMaskDescripted>] where T: FieldMaskDescripted {
-//   messageType.fieldMaskDescriptor.fields
-// }
-
+/// Builds arrays of `FieldMaskUtilFieldDescriptor`s.
+///
+/// This builder should be used via the `build()` static function on `FieldMaskUtilDescriptor`.
 @resultBuilder
 public struct FieldDescriptorBuilder<T: FieldMaskDescripted> {
   public typealias FieldDescriptor = FieldMaskUtilFieldDescriptor<T>
@@ -49,7 +49,12 @@ public struct FieldDescriptorBuilder<T: FieldMaskDescripted> {
   }
 }
 
-// Descriptor for a field - suitable only for use by FieldMaskUtil.
+/// Descriptor for a field - limited to the parameters needed by this package.
+/// 
+/// Note: all parameters are intentionally internal, and these descriptors are
+/// not intended to be used by others. Access the public API via the extensions
+/// on `Google_Protobuf_FieldMask`, and extensions on `Message` generated via
+/// `protoc-genfieldmaskutil-swift`.
 public struct FieldMaskUtilFieldDescriptor<T: FieldMaskDescripted>: Sendable {
   let name: String
   let keyPath: PartialKeyPath<T>
@@ -59,6 +64,17 @@ public struct FieldMaskUtilFieldDescriptor<T: FieldMaskDescripted>: Sendable {
   let messageType: (any FieldMaskDescripted.Type)?
   let isSubmessageField: Bool
 
+  /// Extends the given field descriptors with the given `baseName` and `rootKeyPath`.
+  /// 
+  /// - Parameters:
+  ///   - fields: a list of fields. The `Root` of each pathKey must be the same type
+  ///     as the `Value` of the given `rootKeyPath`.
+  ///   - baseName: the base path to prepend to each path in the given fields.
+  ///   - rootKeyPath: the root key path to prepend to each key path in the given
+  ///     fields. As mentioned above, the `Value` of this key path must be the
+  ///     same as the `Root` of each keyPath in `fields`.
+  /// - Returns: an Array of field descriptors, anchored the given `baseName` and
+  ///   `rootKeyPath`.
   public static func allFrom(
     _ fields: [FieldMaskUtilFieldDescriptor<some FieldMaskDescripted>],
     baseName: String,
@@ -70,7 +86,15 @@ public struct FieldMaskUtilFieldDescriptor<T: FieldMaskDescripted>: Sendable {
     }
   }
 
-  // Initialiser for building descriptors from sub-fields.
+  /// Initialiser for building descriptors from sub-fields.
+  /// 
+  /// - Parameters:
+  ///   - field: a field descriptor. The `Root` of the pathKey must be the same type
+  ///     as the `Value` of the given `rootKeyPath`.
+  ///   - baseName: the base path to prepend to the path in the given field.
+  ///   - rootKeyPath: the root key path to prepend to the key path in the given
+  ///     field. As mentioned above, the `Value` of this key path must be the
+  ///     same as the `Root` of the keyPath in `field`.
   public init(
     from field: FieldMaskUtilFieldDescriptor<some FieldMaskDescripted>,
     baseName: String,
@@ -86,7 +110,17 @@ public struct FieldMaskUtilFieldDescriptor<T: FieldMaskDescripted>: Sendable {
       isSubmessageField: true)
   }
 
-  // Standard initialiser.
+  /// Standard memberwise initialiser.
+  /// 
+  /// - Parameters:
+  ///   - name: the path name for this field.
+  ///   - keyPath: the key path representing access to this field within its Message.
+  ///   - isRepeated: whether the path points to a repeated proto field.
+  ///   - isMessage: whether the path points to a field with a message type.
+  ///   - isRequired: whether the path points to a required field.
+  ///   - messageType: the type of the message. Only set if isMessage is true.
+  ///   - isSubmessageField: true if this is a submessage field, and not a field
+  ///     in the top-level Message.
   public init(
     name: String,
     keyPath: PartialKeyPath<T>,
@@ -96,6 +130,7 @@ public struct FieldMaskUtilFieldDescriptor<T: FieldMaskDescripted>: Sendable {
     messageType: (any FieldMaskDescripted.Type)? = nil,
     isSubmessageField: Bool = false
   ) {
+    precondition(!isMessage || messageType != nil)
     self.name = name
     self.keyPath = keyPath
     self.isRepeated = isRepeated
@@ -105,7 +140,7 @@ public struct FieldMaskUtilFieldDescriptor<T: FieldMaskDescripted>: Sendable {
     self.isSubmessageField = isSubmessageField
   }
 
-  // Builder wrapping the initialiser.
+  /// Builder wrapping the initialiser.
   static func with(
     name: String,
     keyPath: PartialKeyPath<T>,
@@ -136,13 +171,19 @@ public struct FieldMaskUtilDescriptor<T: FieldMaskDescripted>: Sendable {
   let messageFields: Set<PartialKeyPath<T>>
   let requiredFields: Set<PartialKeyPath<T>>
 
+  /// Builder to construct a descriptor from a FieldDescriptorBuilder.
+  /// 
+  /// - Parameter builder: the builder to use.
+  /// - Returns: a new descriptor, using field descriptors from the given builder.
   public static func build(
     @FieldDescriptorBuilder<T> _ builder: () -> [FieldMaskUtilFieldDescriptor<T>]
   ) -> FieldMaskUtilDescriptor<T> {
     Self.init(descriptors: builder())
   }
 
-  // Initialise from a set of FieldDescriptors.
+  /// Initialise from a set of FieldDescriptors.
+  /// 
+  /// Consider using the builder instead.
   public init(
     descriptors: [FieldMaskUtilFieldDescriptor<T>]
   ) {
@@ -157,13 +198,20 @@ public struct FieldMaskUtilDescriptor<T: FieldMaskDescripted>: Sendable {
   }
 }
 
-// Protocol for any Messages that have a FieldMaskUtilDescriptor.
+/// Protocol for any Messages that have a FieldMaskUtilDescriptor.
 public protocol FieldMaskDescripted: Message {
+  /// Accessor for the descriptor for this Message type.
   static var fieldMaskDescriptor: FieldMaskUtilDescriptor<Self> { get }
+
+  /// Validates that the given path is contained within the set of fields in the descriptor.
+  /// 
+  /// - Parameter path: the path to check validity of.
+  /// - Returns: whether the given `path` is valid for this Message type.
   static func isValidPath(_ path: String) -> Bool
 }
 
 extension FieldMaskDescripted {
+  /// Default implementation.
   public static func isValidPath(_ path: String) -> Bool {
     return fieldMaskDescriptor.inverseKeyPaths[path] != nil
   }
