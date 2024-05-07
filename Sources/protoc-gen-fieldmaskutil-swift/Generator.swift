@@ -89,9 +89,9 @@ class Generator {
   ) {
     let spaceBeforeOpeningBrace: Bool
     switch braces {
-    case .curly, .square:
+    case .curly:
       spaceBeforeOpeningBrace = true
-    case .round, .none:
+    case .round, .square, .none:
       spaceBeforeOpeningBrace = false
     }
 
