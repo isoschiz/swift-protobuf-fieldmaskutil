@@ -38,6 +38,9 @@ extension Generator {
     let fieldName = protobufNamer.messagePropertyNames(field: field, prefixed: "", includeHasAndClear: false).name
     return "\(fieldDescriptorsVarName)__\(fieldName)" 
   }
+  internal var fieldSubtypeName: String {
+    return field.type == .message ? "\(fullNameFor(field.messageType!)).self" : "nil"
+  }
   internal func fieldDescriptorsVarName(for thisMessage: Descriptor) -> String {
     return "_fieldDescriptorsFor\(fullNameFor(thisMessage).replacingOccurrences(of: ".", with: "__"))"
   }
