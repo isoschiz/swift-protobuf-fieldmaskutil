@@ -52,6 +52,7 @@ class Generator {
     case none
     case curly
     case round
+    case square
 
     var open: String {
       switch self {
@@ -61,6 +62,8 @@ class Generator {
         return "{"
       case .round:
         return "("
+      case .square:
+        return "["
       }
     }
 
@@ -72,6 +75,8 @@ class Generator {
         return "}"
       case .round:
         return ")"
+      case .square:
+        return "]"
       }
     }
   }
@@ -79,11 +84,12 @@ class Generator {
   internal func withIndentation(
     _ header: String,
     braces: Braces,
+    trailingComma: Bool = false,
     _ body: () -> Void
   ) {
     let spaceBeforeOpeningBrace: Bool
     switch braces {
-    case .curly:
+    case .curly, .square:
       spaceBeforeOpeningBrace = true
     case .round, .none:
       spaceBeforeOpeningBrace = false
@@ -91,7 +97,7 @@ class Generator {
 
     self.println(header + "\(spaceBeforeOpeningBrace ? " " : "")" + "\(braces.open)")
     self.withIndentation(body: body)
-    self.println(braces.close)
+    self.println(braces.close + "\(trailingComma ? "," : "")")
   }
 
 
