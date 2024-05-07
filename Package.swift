@@ -22,6 +22,10 @@ let package = Package(
       name: "FieldMaskUtil",
       targets: ["FieldMaskUtil"]
     ),
+    .plugin(
+        name: "SwiftProtobufFieldMaskUtilPlugin",
+        targets: ["SwiftProtobufFieldMaskUtilPlugin"]
+    ),
   ],
   dependencies: [
     .package(
@@ -50,10 +54,19 @@ let package = Package(
       path: "Sources/FieldMaskUtil",
       swiftSettings: .packageSettings
     ),
+    .plugin(
+        name: "SwiftProtobufFieldMaskUtilPlugin",
+        capability: .buildTool(),
+        dependencies: ["protoc-gen-fieldmaskutil-swift"]
+    ),
     .testTarget(
         name: "FieldMaskUtilTests",
         dependencies: ["FieldMaskUtil"],
-        swiftSettings: .packageSettings
+        swiftSettings: .packageSettings,
+        plugins: [
+            .plugin(name: "SwiftProtobufPlugin", package: "swift-protobuf"),
+            .plugin(name: "SwiftProtobufFieldMaskUtilPlugin"),
+        ]
     ),
   ]
 )

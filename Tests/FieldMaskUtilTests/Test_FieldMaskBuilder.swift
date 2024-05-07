@@ -148,4 +148,20 @@ final class Test_FieldMaskBuilder: XCTestCase {
       "Expected specific paths: \(fieldMask.paths)"
     )
   }
+
+  private func buildInvalidFieldMask() throws -> Google_Protobuf_FieldMask {
+    return try typeProto.buildFieldMask {
+      \.edition
+      \.debugDescription
+      \.sourceContext
+    }
+  }
+
+  func test_invalidkeypath() throws {
+    XCTAssertThrowsError(try buildInvalidFieldMask()) { error in
+        XCTAssertEqual(
+          error as! FieldMaskErrors,
+          FieldMaskErrors.keyPathNotFound(\Google_Protobuf_Type.debugDescription))
+    }    
+  }
 }

@@ -2,7 +2,7 @@ import Foundation
 import SwiftProtobuf
 
 final class FieldMaskTree {
-  final class Node: Equatable {
+  fileprivate final class Node: Equatable {
     let key: String
     var children: [String: Node] = [:]
     
@@ -25,7 +25,7 @@ final class FieldMaskTree {
       }
     }
   }
-  var root = Node(key: "")
+  fileprivate var root = Node(key: "")
   
   init() {}
   
@@ -44,13 +44,14 @@ final class FieldMaskTree {
   func addPaths(from fieldMask: Google_Protobuf_FieldMask) -> Bool {
     var changed = false
     for path in fieldMask.paths {
-      changed = changed || self.addPath(path)
+      changed = self.addPath(path) || changed
     }
     return changed
   }
   
   // Returns whether the tree was mutated.
   func addPath(_ path: String) -> Bool {
+    print("adding \(path)")
     var curr = root
     var newBranch = false
     for segment in path.split(separator: ".") {

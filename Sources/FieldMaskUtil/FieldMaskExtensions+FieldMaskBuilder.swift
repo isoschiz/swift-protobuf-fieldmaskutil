@@ -47,7 +47,7 @@ extension FieldMaskExtensions where Self: Message {
   public func buildFieldMask(
     @FieldMaskBuilder<Self> _ builder: () -> [PathElement<Self>]
   ) throws -> Google_Protobuf_FieldMask {
-    var tree = FieldMaskTree()
+    let tree = FieldMaskTree()
     let elements = builder()
     for element in elements {
       switch element {
@@ -55,12 +55,12 @@ extension FieldMaskExtensions where Self: Message {
         guard let _ = Self.fieldMaskDescriptor.inverseKeyPaths[path] else {
           throw FieldMaskErrors.pathNotFound(path)
         }
-        tree.addPath(path)
+        _ = tree.addPath(path)
       case .keyPath(let keyPath):
         guard let path = Self.fieldMaskDescriptor.keyPaths[keyPath] else {
           throw FieldMaskErrors.keyPathNotFound(keyPath)
         }
-        tree.addPath(path)
+        _ = tree.addPath(path)
       }
     }
     return tree.asFieldMask

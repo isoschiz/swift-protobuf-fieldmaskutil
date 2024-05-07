@@ -1,7 +1,7 @@
 import Foundation
 import SwiftProtobuf
 
-public enum FieldMaskErrors: Error {
+public enum FieldMaskErrors: Error, Equatable {
   case keyPathNotFound(AnyKeyPath)
   case pathNotFound(String)
   case nonWritableKeyPath(AnyKeyPath)

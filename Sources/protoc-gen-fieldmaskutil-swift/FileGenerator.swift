@@ -12,7 +12,7 @@ extension Generator {
     // seenFields.insert(fullName)
 
     let extraDescriptors: [FieldDescriptor] = message.fields.filter {
-      field.type == .message && field.messageType != nil
+      $0.type == .message && $0.messageType != nil
     }
     // for field in message.fields {
     //   if case .message = field.type, let _ = field.messageType {
