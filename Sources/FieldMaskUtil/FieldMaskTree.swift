@@ -71,7 +71,7 @@ final class FieldMaskTree {
       }
     }
     guard curr.children.isEmpty else {
-      // Need to remove the more specified children. E.g. adding foo.bar
+      // Need to remove the more specific children. E.g. adding foo.bar
       // to a tree that already has foo.bar.baz.
       curr.children.removeAll()
       return true
@@ -130,7 +130,12 @@ final class FieldMaskTree {
     if root.children.isEmpty {
       return
     }
-    try mergeMessage(node: root, pathPrefix: root.key, from: message,to: &destination, options: options)
+    try mergeMessage(
+      node: root,
+      pathPrefix: root.key,
+      from: message,
+      to: &destination,
+      options: options)
   }
 
   private func mergeMessage<T: FieldMaskDescripted>(
@@ -165,37 +170,44 @@ final class FieldMaskTree {
         continue
       }
 
-      let newValue = message[keyPath: keyPath]
-      let valueType = type(of: newValue) as! any FieldMaskWritable.Type
+      guard let newValue = message[keyPath: keyPath] as? any FieldMaskWritable else {
+        throw FieldMaskErrors.nonWritableKeyPath(keyPath)
+      }
+      //let valueType = type(of: newValue) as! any FieldMaskWritable.Type
 
       if !field.isRepeated {
         if field.isMessage {
           if options.replaceMessageFields {
-            try valueType.write(keyPath: keyPath, object: &destination, value: newValue)
+            try newValue.write(to: &destination, at: keyPath)
             //destination[keyPath: keyPath] = message[keyPath: keyPath]
           } else {
-            guard let _ = destination[keyPath: keyPath] as? any FieldMaskExtensions else {
+            guard let currValue = destination[keyPath: keyPath] as? any FieldMaskExtensions else {
               throw FieldMaskErrors.messageFieldNotMessage(path)
             }
-            guard let source = message[keyPath: keyPath] as? any FieldMaskExtensions else {
+            guard let source = newValue as? any FieldMaskExtensions else {
               throw FieldMaskErrors.messageFieldNotMessage(path)
             }
-            var tmpValue = destination[keyPath: keyPath] as! any FieldMaskExtensions
+            var tmpValue = currValue
             try tmpValue.merge(from: source)
-            try valueType.write(keyPath: keyPath, object: &destination, value: tmpValue)
+            try (tmpValue as! any FieldMaskWritable).write(to: &destination, at: keyPath)
+            //try valueType.write(keyPath: keyPath, object: &destination, value: tmpValue)
             //destination[keyPath: keyPath] = tmpValue
           }
         } else { // !isMessage
-          try valueType.write(keyPath: keyPath, object: &destination, value: newValue)
+          try newValue.write(to: &destination, at: keyPath)
+          //try valueType.write(keyPath: keyPath, object: &destination, value: newValue)
         }
       } else { // isRepeated
         if options.replaceRepeatedFields {
-          try valueType.write(keyPath: keyPath, object: &destination, value: newValue)
+          try newValue.write(to: &destination, at: keyPath)
+          //try valueType.write(keyPath: keyPath, object: &destination, value: newValue)
         } else {
           guard let newValue = newValue as? Array<Any>, let oldValue = destination[keyPath: keyPath] as? Array<Any> else {
             throw FieldMaskErrors.repeatedFieldNotCollection(path)
           }
-          try valueType.write(keyPath: keyPath, object: &destination, value: oldValue + newValue)
+          let value = oldValue + newValue as! any FieldMaskWritable
+          try value.write(to: &destination, at: keyPath)
+          //try valueType.write(keyPath: keyPath, object: &destination, value: oldValue + newValue)
         }
       }
     }
