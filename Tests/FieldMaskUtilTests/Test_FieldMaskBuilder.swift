@@ -18,7 +18,7 @@ final class Test_FieldMaskBuilder: XCTestCase {
       \.name
     }
 
-    assert(fieldMask.paths == ["name", "source_context.file_name", "syntax"])
+    XCTAssert(fieldMask.paths == ["name", "source_context.file_name", "syntax"])
   }
 
   func test_duplicated() throws {
@@ -29,7 +29,7 @@ final class Test_FieldMaskBuilder: XCTestCase {
       "source_context.file_name"
     }
 
-    assert(
+    XCTAssert(
       fieldMask.paths == ["name", "source_context.file_name", "syntax"],
       "Unexpected paths: \(fieldMask.paths)"
     )
@@ -43,7 +43,7 @@ final class Test_FieldMaskBuilder: XCTestCase {
       \.sourceContext
     }
 
-    assert(
+    XCTAssert(
       fieldMask.paths == ["name", "source_context", "syntax"],
       "Unexpected paths: \(fieldMask.paths)"
     )
@@ -57,11 +57,11 @@ final class Test_FieldMaskBuilder: XCTestCase {
         \.name
         "unknown_file.path"
       }
-      assert(false, "Expected error - none thrown: \(fieldMask)")
+      XCTAssert(false, "Expected error - none thrown: \(fieldMask)")
     } catch FieldMaskErrors.pathNotFound(let path) {
-      assert(path == "unknown_file.path")
+      XCTAssert(path == "unknown_file.path")
     } catch {
-      assert(false, "Unexpected error thrown: \(error)")
+      XCTAssert(false, "Unexpected error thrown: \(error)")
     }
   }
 
@@ -79,13 +79,13 @@ final class Test_FieldMaskBuilder: XCTestCase {
       }
     }
 
-    assert(fieldMask.paths == ["name", "source_context.file_name", "syntax"])
+    XCTAssert(fieldMask.paths == ["name", "source_context.file_name", "syntax"])
   }
 
   func test_empty() throws {
     let fieldMask = try typeProto.buildFieldMask {}
 
-    assert(fieldMask.paths == [], "Expected empty paths: \(fieldMask.paths)")
+    XCTAssert(fieldMask.paths == [], "Expected empty paths: \(fieldMask.paths)")
   }
 
   func test_arrays() throws {
@@ -94,7 +94,7 @@ final class Test_FieldMaskBuilder: XCTestCase {
       ["syntax", "source_context.file_name"]
     }
 
-    assert(fieldMask.paths == ["edition", "name", "source_context.file_name", "syntax"])
+    XCTAssert(fieldMask.paths == ["edition", "name", "source_context.file_name", "syntax"])
   }
 
   func test_branches() throws {
@@ -114,7 +114,7 @@ final class Test_FieldMaskBuilder: XCTestCase {
       }
     }
 
-    assert(
+    XCTAssert(
       fieldMask.paths == ["source_context", "syntax"],
       "Expected specific paths: \(fieldMask.paths)"
     )
@@ -128,7 +128,7 @@ final class Test_FieldMaskBuilder: XCTestCase {
       }
     }
 
-    assert(
+    XCTAssert(
       fieldMask.paths == ["edition", "name", "source_context.file_name", "syntax"],
       "Expected specific paths: \(fieldMask.paths)"
     )
@@ -143,7 +143,7 @@ final class Test_FieldMaskBuilder: XCTestCase {
       \.edition
     }
 
-    assert(
+    XCTAssert(
       fieldMask.paths == ["edition", "source_context.file_name", "syntax"],
       "Expected specific paths: \(fieldMask.paths)"
     )

@@ -10,11 +10,11 @@ extension FieldMaskExtensions {
       throw FieldMaskErrors.mergingDifferentMessageTypes
     }
     let fieldMask = Google_Protobuf_FieldMask(forAllFieldsIn: self)
-    try self.merge(other, with: fieldMask, options: options)
+    try self.merge(from: other, with: fieldMask, options: options)
   }
 
   public mutating func merge(
-    _ other: any FieldMaskExtensions,
+    from other: any FieldMaskExtensions,
     with fieldMask: Google_Protobuf_FieldMask,
     options: MergeOptions = MergeOptions()
   ) throws {
@@ -23,6 +23,25 @@ extension FieldMaskExtensions {
     }
     let tree = FieldMaskTree(from: fieldMask)
     try tree.mergeMessage(from: other, to: &self, options: options)
+  }
+
+  public func merging(
+    from other: any FieldMaskExtensions,
+    options: MergeOptions = MergeOptions()
+  ) throws -> Self {
+    var result = self
+    try result.merge(from: other, options: options)
+    return result
+  }
+
+  public func merging(
+    from other: any FieldMaskExtensions,
+    with fieldMask: Google_Protobuf_FieldMask,
+    options: MergeOptions = MergeOptions()
+  ) throws -> Self {
+    var result = self
+    try result.merge(from: other, with: fieldMask, options: options)
+    return result
   }
 }
 

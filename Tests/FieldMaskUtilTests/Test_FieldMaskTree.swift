@@ -18,7 +18,7 @@ final class Test_FieldMaskTree: XCTestCase {
   func test_empty() throws {
     let tree = FieldMaskTree()
     let fieldMask = tree.asFieldMask
-    assert(fieldMask.paths == [])
+    XCTAssert(fieldMask.paths == [])
   }
 
   func test_fromfieldmask() throws {
@@ -29,7 +29,7 @@ final class Test_FieldMaskTree: XCTestCase {
 
     let tree = FieldMaskTree(from: testProtoFieldMask)
     let fieldMask = tree.asFieldMask
-    assert(fieldMask.paths == ["bool_value", "string_value"])
+    XCTAssert(fieldMask.paths == ["bool_value", "string_value"])
   }
 
   func test_addpathsfromfieldmask() throws {
@@ -46,8 +46,41 @@ final class Test_FieldMaskTree: XCTestCase {
     let tree = FieldMaskTree(from: fieldMaskBase)
     _ = tree.addPaths(from: fieldMaskAddition)
     let fieldMask = tree.asFieldMask
-    assert(
+    XCTAssert(
       fieldMask.paths == ["bool_value", "bytes_value", "int32_value", "string_value"],
+      "Expected specific field paths: \(fieldMask.paths)"
+    )
+  }
+
+  func test_addparentpath() throws {
+    let fieldMaskBase = try testProto.buildFieldMask {
+      \.submessage.name
+      \.submessage.value
+      \.bytesValue
+      \.uint32Value
+    }
+
+    let tree = FieldMaskTree(from: fieldMaskBase)
+    _ = tree.addPath("submessage")
+    let fieldMask = tree.asFieldMask
+    XCTAssert(
+      fieldMask.paths == ["bytes_value", "submessage", "uint32_value"],
+      "Expected specific field paths: \(fieldMask.paths)"
+    )
+  }
+
+  func test_addchildpath() throws {
+    let fieldMaskBase = try testProto.buildFieldMask {
+      \.submessage
+      \.bytesValue
+      \.uint32Value
+    }
+
+    let tree = FieldMaskTree(from: fieldMaskBase)
+    _ = tree.addPath("submessage.name")
+    let fieldMask = tree.asFieldMask
+    XCTAssert(
+      fieldMask.paths == ["bytes_value", "submessage", "uint32_value"],
       "Expected specific field paths: \(fieldMask.paths)"
     )
   }

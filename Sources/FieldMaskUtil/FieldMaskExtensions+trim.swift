@@ -20,6 +20,15 @@ extension FieldMaskExtensions {
     }
     return self != original
   }
+
+  public func trimming(
+    with fieldMask: Google_Protobuf_FieldMask,
+    options: TrimOptions = TrimOptions()
+  ) throws -> Self {
+    var result = self
+    try result.trim(with: fieldMask, options: options)
+    return result
+  }
 }
 
 // Options controlling how fields are trimmed.

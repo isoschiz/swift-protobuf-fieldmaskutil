@@ -1,6 +1,13 @@
 syntax = "proto3";
 package fieldmasktest;
 
+message SubMessage {
+  // TODO: handle recursion!
+  string name = 1;
+  bool enabled = 2;
+  int32 value = 3;
+}
+
 message FieldMaskTest {
   string string_value = 1;
   double double_value = 2;
@@ -17,4 +24,6 @@ message FieldMaskTest {
   sfixed64 sfixed64_value = 13;
   bool bool_value = 14;
   bytes bytes_value = 15;
+
+  SubMessage submessage = 16;
 }

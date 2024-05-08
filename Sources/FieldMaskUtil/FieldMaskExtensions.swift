@@ -14,9 +14,19 @@ public protocol FieldMaskExtensions: Equatable, FieldMaskDescripted, Message {
     options: MergeOptions
   ) throws
   mutating func merge(
-    _ other: any FieldMaskExtensions,
-    with fieldMask: Google_Protobuf_FieldMask, options: MergeOptions
+    from other: any FieldMaskExtensions,
+    with fieldMask: Google_Protobuf_FieldMask,
+    options: MergeOptions
   ) throws
+  func merging(
+    from other: any FieldMaskExtensions,
+    options: MergeOptions
+  ) throws -> Self
+  func merging(
+    from other: any FieldMaskExtensions,
+    with fieldMask: Google_Protobuf_FieldMask,
+    options: MergeOptions
+  ) throws -> Self
 
   // Trims fields not mentioned in the fieldMask. Returns whether any changes were made.
   @discardableResult
@@ -24,4 +34,8 @@ public protocol FieldMaskExtensions: Equatable, FieldMaskDescripted, Message {
     with fieldMask: Google_Protobuf_FieldMask,
     options: TrimOptions
   ) throws -> Bool
+  func trimming(
+    with fieldMask: Google_Protobuf_FieldMask,
+    options: TrimOptions
+  ) throws -> Self
 }

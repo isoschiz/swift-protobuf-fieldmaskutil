@@ -51,7 +51,6 @@ final class FieldMaskTree {
   
   // Returns whether the tree was mutated.
   func addPath(_ path: String) -> Bool {
-    print("adding \(path)")
     var curr = root
     var newBranch = false
     for segment in path.split(separator: ".") {
